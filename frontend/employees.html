@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees - HRMS</title>
+    <link rel="stylesheet" href="css/employees.css">
+</head>
+<body>
+    <header>
+        <h1>Employee Management</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="employees.html">Employees</a></li>
+                <li><a href="payroll.html">Payroll</a></li>
+                <li><a href="recruitment.html">Recruitment</a></li>
+                <li><a href="leaves.html">Leaves</a></li>
+                <li><a href="performance.html">Performance</a></li>
+                <li><a href="login.html">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="employee-list">
+            <h2>List of Employees</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Department</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Employee rows will be populated here -->
+                </tbody>
+            </table>
+        </section>
+        <section id="employee-form">
+            <h2>Add New Employee</h2>
+            <form id="add-employee-form">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                
+                <label for="position">Position:</label>
+                <input type="text" id="position" name="position" required>
+                
+                <label for="department">Department:</label>
+                <input type="text" id="department" name="department" required>
+                
+                <button type="submit">Add Employee</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 HRMS. All rights reserved.</p>
+    </footer>
+    <script src="js/employees.js"></script>
+</body>
+</html>
