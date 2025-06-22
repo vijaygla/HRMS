@@ -66,3 +66,5 @@ public class Application {
         this.appliedDate = appliedDate;
     }
 }
+
+// ...existing code...
