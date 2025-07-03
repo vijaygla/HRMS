@@ -24,7 +24,7 @@ import { notFound } from './middleware/notFound.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 9000;
 
 // Security middleware
 app.use(helmet());
@@ -68,16 +68,6 @@ const connectDB = async () => {
 
 // Connect to database
 connectDB();
-
-// Health check route
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'HRMS API is running successfully',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
-  });
-});
 
 // API routes
 app.use('/api/auth', authRoutes);

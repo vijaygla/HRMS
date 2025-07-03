@@ -94,12 +94,6 @@ const Login: React.FC = () => {
             <p className="text-gray-600">Sign in to your HRMS account</p>
           </div>
 
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-700 text-sm font-medium mb-2">Demo Credentials:</p>
-            <p className="text-blue-600 text-sm">Email: admin@hrms.com</p>
-            <p className="text-blue-600 text-sm">Password: admin123</p>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -214,3 +208,4 @@ const Login: React.FC = () => {
 };
 
 export default Login;
+
