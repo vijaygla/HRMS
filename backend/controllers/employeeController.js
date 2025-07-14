@@ -25,8 +25,8 @@ export const getEmployees = async (req, res) => {
     if (req.query.search) {
       query.$or = [
         { 'personalInfo.firstName': { $regex: req.query.search, $options: 'i' } },
-        { 'personalInfo.lastName': { $regex: req.query.search, $options: 'i' } },
-        { employeeId: { $regex: req.query.search, $options: 'i' } }
+        { 'personalInfo.lastName':  { $regex: req.query.search, $options: 'i' } },
+        { employeeId:                { $regex: req.query.search, $options: 'i' } }
       ];
     }
 
@@ -91,12 +91,21 @@ export const createEmployee = async (req, res) => {
   try {
     const { userInfo, ...employeeData } = req.body;
 
-    // Create user account first
-    const user = await User.create({
+    // Check for existing user
+    let user = await User.findOne({ email: userInfo.email });
+    if (user) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this email already exists'
+      });
+    }
+
+    // Create user account
+    user = await User.create({
       name: `${employeeData.personalInfo.firstName} ${employeeData.personalInfo.lastName}`,
       email: userInfo.email,
       password: userInfo.password || 'defaultPassword123',
-      role: userInfo.role || 'employee'
+      role: userInfo.role     || 'employee'
     });
 
     // Create employee profile
@@ -165,7 +174,7 @@ export const deleteEmployee = async (req, res) => {
       });
     }
 
-    // Soft delete - change status to terminated
+    // Soft delete
     employee.status = 'terminated';
     await employee.save();
 
@@ -225,13 +234,7 @@ export const uploadEmployeeDocument = async (req, res) => {
       });
     }
 
-    employee.documents.push({
-      name,
-      type,
-      url,
-      uploadDate: new Date()
-    });
-
+    employee.documents.push({ name, type, url, uploadDate: new Date() });
     await employee.save();
 
     res.status(200).json({

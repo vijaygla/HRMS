@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, UserPlus, Calendar, DollarSign } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 interface Activity {
   id: string;
@@ -7,7 +7,7 @@ interface Activity {
   user: string;
   action: string;
   time: string;
-  icon: any;
+  icon: React.ComponentType;
   color: string;
 }
 
@@ -16,16 +16,13 @@ const RecentActivity: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading recent activities
-    // In a real app, this would fetch from your API
     const fetchActivities = async () => {
       try {
         setIsLoading(true);
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // For now, we'll show a message that no activities are available
-        setActivities([]);
+        // Replace with your real API endpoint
+        const response = await fetch('/api/activities');
+        const data: Activity[] = await response.json();
+        setActivities(data);
       } catch (error) {
         console.error('Error fetching activities:', error);
       } finally {
@@ -43,7 +40,8 @@ const RecentActivity: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
         </div>
         <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => (
+          {/* Loading skeleton */}
+          {[...Array(4)].map((_, i) => (
             <div key={i} className="flex items-center gap-4 p-4 rounded-lg animate-pulse">
               <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
               <div className="flex-1">
@@ -69,8 +67,13 @@ const RecentActivity: React.FC = () => {
       {activities.length > 0 ? (
         <div className="space-y-4">
           {activities.map((activity) => (
-            <div key={activity.id} className="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.color}`}>
+            <div
+              key={activity.id}
+              className="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.color}`}
+              >
                 <activity.icon className="w-5 h-5" />
               </div>
               <div className="flex-1">

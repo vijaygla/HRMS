@@ -268,7 +268,9 @@ export const updateProfile = async (req, res) => {
       avatar: user.avatar,
       isActive: user.isActive,
       lastLogin: user.lastLogin,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
+      phoneNumber: user.phoneNumber,
+      location: user.location
     };
 
     res.status(200).json({

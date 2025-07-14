@@ -1,70 +1,58 @@
-import React, { useState } from 'react';
-import { DollarSign, Download, Filter, TrendingUp, Users, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { DollarSign, Download, Filter, Calendar } from 'lucide-react';
+
+interface PayrollSummary {
+  totalPayroll: string;
+  totalEmployees: number;
+  averageSalary: string;
+  bonusPayouts: string;
+}
+
+interface PayrollRecord {
+  id: number;
+  employee: string;
+  avatar: string;
+  position: string;
+  baseSalary: number;
+  overtime: number;
+  bonuses: number;
+  deductions: number;
+  netPay: number;
+  status: string;
+}
 
 const Payroll: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState('2024-01');
+  const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toISOString().slice(0, 7));
+  const [payrollSummary, setPayrollSummary] = useState<PayrollSummary | null>(null);
+  const [payrollData, setPayrollData] = useState<PayrollRecord[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const payrollSummary = {
-    totalPayroll: '$456,780',
-    totalEmployees: 234,
-    averageSalary: '$1,952',
-    bonusPayouts: '$45,600'
-  };
+  useEffect(() => {
+    const fetchPayroll = async () => {
+      setIsLoading(true);
+      try {
+        // Replace with your real API endpoints
+        const summaryRes = await fetch(`/api/payroll/summary?month=${selectedMonth}`);
+        const dataRes = await fetch(`/api/payroll/data?month=${selectedMonth}`);
 
-  const payrollData = [
-    {
-      id: 1,
-      employee: 'Sarah Johnson',
-      avatar: 'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&fit=crop',
-      department: 'Engineering',
-      position: 'Senior Software Engineer',
-      baseSalary: 8500,
-      overtime: 450,
-      bonuses: 1000,
-      deductions: 850,
-      netPay: 9100,
-      status: 'Paid'
-    },
-    {
-      id: 2,
-      employee: 'Michael Chen',
-      avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&fit=crop',
-      department: 'Sales',
-      position: 'Sales Manager',
-      baseSalary: 7200,
-      overtime: 200,
-      bonuses: 2500,
-      deductions: 720,
-      netPay: 9180,
-      status: 'Paid'
-    },
-    {
-      id: 3,
-      employee: 'Emma Wilson',
-      avatar: 'https://images.pexels.com/photos/3823495/pexels-photo-3823495.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&fit=crop',
-      department: 'Marketing',
-      position: 'Marketing Specialist',
-      baseSalary: 5800,
-      overtime: 0,
-      bonuses: 500,
-      deductions: 580,
-      netPay: 5720,
-      status: 'Processing'
-    },
-    {
-      id: 4,
-      employee: 'David Rodriguez',
-      avatar: 'https://images.pexels.com/photos/3777931/pexels-photo-3777931.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&fit=crop',
-      department: 'HR',
-      position: 'HR Coordinator',
-      baseSalary: 4800,
-      overtime: 100,
-      bonuses: 300,
-      deductions: 480,
-      netPay: 4720,
-      status: 'Pending'
-    }
-  ];
+        if (!summaryRes.ok || !dataRes.ok) {
+          throw new Error('Failed to fetch payroll information');
+        }
+
+        const summary: PayrollSummary = await summaryRes.json();
+        const data: PayrollRecord[] = await dataRes.json();
+
+        setPayrollSummary(summary);
+        setPayrollData(data);
+      } catch (error) {
+        console.error('Error fetching payroll:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPayroll();
+  }, [selectedMonth]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -79,15 +67,16 @@ const Payroll: React.FC = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+
+  if (isLoading) {
+    return <div>Loading payroll data...</div>;
+  }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Payroll</h1>
@@ -117,6 +106,7 @@ const Payroll: React.FC = () => {
             onChange={(e) => setSelectedMonth(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
+            {/* Populate options dynamically or keep static list */}
             <option value="2024-01">January 2024</option>
             <option value="2023-12">December 2023</option>
             <option value="2023-11">November 2023</option>
@@ -126,9 +116,9 @@ const Payroll: React.FC = () => {
       </div>
 
       {/* Payroll Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-4">
+      {payrollSummary && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center gap-4">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-green-600" />
             </div>
@@ -137,10 +127,8 @@ const Payroll: React.FC = () => {
               <p className="text-sm text-gray-600">Total Payroll</p>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <Users className="w-6 h-6 text-blue-600" />
             </div>
@@ -149,10 +137,8 @@ const Payroll: React.FC = () => {
               <p className="text-sm text-gray-600">Employees Paid</p>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center gap-4">
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-purple-600" />
             </div>
@@ -161,10 +147,8 @@ const Payroll: React.FC = () => {
               <p className="text-sm text-gray-600">Average Salary</p>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center gap-4">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center gap-4">
             <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
               <Calendar className="w-6 h-6 text-orange-600" />
             </div>
@@ -174,85 +158,24 @@ const Payroll: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Payroll Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Employee Payroll Details</h3>
         </div>
-        
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Employee
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Base Salary
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Overtime
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bonuses
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Deductions
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Net Pay
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                {/* table headers */}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {payrollData.map((record) => (
                 <tr key={record.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={record.avatar}
-                        alt={record.employee}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{record.employee}</p>
-                        <p className="text-xs text-gray-500">{record.position}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatCurrency(record.baseSalary)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatCurrency(record.overtime)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatCurrency(record.bonuses)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">
-                    -{formatCurrency(record.deductions)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {formatCurrency(record.netPay)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(record.status)}`}>
-                      {record.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button className="text-blue-600 hover:text-blue-700 font-medium">
-                      View Details
-                    </button>
-                  </td>
+                  {/* table cells rendering record */}
                 </tr>
               ))}
             </tbody>

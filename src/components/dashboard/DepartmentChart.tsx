@@ -14,23 +14,26 @@ const DepartmentChart: React.FC = () => {
 
   useEffect(() => {
     const fetchDepartmentData = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
         const response = await departmentService.getDepartments();
-        
-        if (response.success && response.data) {
+        if (response.success && Array.isArray(response.data)) {
           const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
-          
-          const chartData = response.data.map((dept: any, index: number) => ({
-            name: dept.name,
-            value: dept.employeeCount || 0,
-            color: colors[index % colors.length]
-          })).filter((dept: DepartmentData) => dept.value > 0);
-          
+          const chartData = response.data
+            .map((dept: any, index: number) => ({
+              name: dept.name,
+              value: dept.employeeCount ?? 0,
+              color: colors[index % colors.length]
+            }))
+            .filter((dept: DepartmentData) => dept.value > 0);
           setData(chartData);
+        } else {
+          console.error('Unexpected department data format:', response.data);
+          setData([]);
         }
       } catch (error) {
         console.error('Error fetching department data:', error);
+        setData([]);
       } finally {
         setIsLoading(false);
       }
@@ -39,26 +42,17 @@ const DepartmentChart: React.FC = () => {
     fetchDepartmentData();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-gray-900">Department Distribution</h3>
-        </div>
-        <div className="h-80 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-900">Department Distribution</h3>
       </div>
-      
-      {data.length > 0 ? (
+
+      {isLoading ? (
+        <div className="h-80 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      ) : data.length > 0 ? (
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -74,16 +68,16 @@ const DepartmentChart: React.FC = () => {
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'white', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'white',
                 border: '1px solid #e5e7eb',
                 borderRadius: '8px',
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-              }} 
+              }}
             />
-            <Legend 
-              verticalAlign="bottom" 
+            <Legend
+              verticalAlign="bottom"
               height={36}
               wrapperStyle={{ paddingTop: '20px' }}
             />
