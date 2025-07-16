@@ -39,3 +39,4 @@ router.get('/:id/payslip', generatePayslip);
 router.get('/stats/overview', authorize('admin', 'hr'), getPayrollStats);
 
 export default router;
+

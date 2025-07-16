@@ -49,5 +49,36 @@ export const authService = {
     } catch (error) {
       throw error.response?.data || { message: 'Password change failed' };
     }
+  },
+
+  // Forgot password
+  forgotPassword: async (email) => {
+    try {
+      const response = await api.post('/auth/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to send reset email' };
+    }
+  },
+
+  // Reset password
+  resetPassword: async (token, password) => {
+    try {
+      const response = await api.put(`/auth/reset-password/${token}`, { password });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Password reset failed' };
+    }
+  },
+
+  // Logout user
+  logout: async () => {
+    try {
+      const response = await api.post('/auth/logout');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Logout failed' };
+    }
   }
 };
+

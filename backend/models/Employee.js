@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 const employeeSchema = new mongoose.Schema({
   employeeId: {
     type: String,
-    unique: true,
-    required: true
+    required: true,
+    unique: true
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -22,7 +22,9 @@ const employeeSchema = new mongoose.Schema({
       required: [true, 'Last name is required'],
       trim: true
     },
-    dateOfBirth: Date,
+    dateOfBirth: {
+      type: Date
+    },
     gender: {
       type: String,
       enum: ['male', 'female', 'other']
@@ -72,7 +74,9 @@ const employeeSchema = new mongoose.Schema({
       type: Date,
       required: [true, 'Join date is required']
     },
-    endDate: Date,
+    endDate: {
+      type: Date
+    },
     manager: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Employee'
@@ -86,8 +90,7 @@ const employeeSchema = new mongoose.Schema({
   salary: {
     baseSalary: {
       type: Number,
-      required: [true, 'Base salary is required'],
-      min: [0, 'Base salary must be a positive number']
+      required: [true, 'Base salary is required']
     },
     currency: {
       type: String,
@@ -100,29 +103,44 @@ const employeeSchema = new mongoose.Schema({
     }
   },
   benefits: {
-    healthInsurance: { type: Boolean, default: false },
-    dentalInsurance: { type: Boolean, default: false },
-    visionInsurance: { type: Boolean, default: false },
-    retirement401k:  { type: Boolean, default: false }
-  },
-  documents: [
-    {
-      name: String,
-      type: String,
-      url: String,
-      uploadDate: { type: Date, default: Date.now }
+    healthInsurance: {
+      type: Boolean,
+      default: false
+    },
+    dentalInsurance: {
+      type: Boolean,
+      default: false
+    },
+    visionInsurance: {
+      type: Boolean,
+      default: false
+    },
+    retirement401k: {
+      type: Boolean,
+      default: false
     }
-  ],
+  },
+  documents: [{
+    name: String,
+    type: String,
+    url: String,
+    uploadDate: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   status: {
     type: String,
     enum: ['active', 'inactive', 'terminated', 'on-leave'],
     default: 'active'
   }
-}, { timestamps: true });
+}, {
+  timestamps: true
+});
 
-// Generate employee ID before validation
-employeeSchema.pre('validate', async function(next) {
-  if (this.isNew && !this.employeeId) {
+// Generate employee ID
+employeeSchema.pre('save', async function(next) {
+  if (!this.employeeId) {
     const count = await mongoose.model('Employee').countDocuments();
     this.employeeId = `EMP${String(count + 1).padStart(4, '0')}`;
   }
@@ -134,12 +152,20 @@ employeeSchema.virtual('fullName').get(function() {
   return `${this.personalInfo.firstName} ${this.personalInfo.lastName}`;
 });
 
-// Populate user, department, and manager
+// Populate user data
 employeeSchema.pre(/^find/, function(next) {
-  this.populate({ path: 'user', select: 'name email avatar role' })
-      .populate({ path: 'jobInfo.department', select: 'name code' })
-      .populate({ path: 'jobInfo.manager', select: 'personalInfo.firstName personalInfo.lastName employeeId' });
+  this.populate({
+    path: 'user',
+    select: 'name email avatar role'
+  }).populate({
+    path: 'jobInfo.department',
+    select: 'name code'
+  }).populate({
+    path: 'jobInfo.manager',
+    select: 'personalInfo.firstName personalInfo.lastName employeeId'
+  });
   next();
 });
 
 export default mongoose.model('Employee', employeeSchema);
+

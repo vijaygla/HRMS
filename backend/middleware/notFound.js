@@ -5,3 +5,4 @@ export const notFound = (req, res, next) => {
     message: error.message
   });
 };
+

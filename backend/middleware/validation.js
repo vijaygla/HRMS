@@ -116,3 +116,4 @@ export const validateAttendance = [
     .isISO8601()
     .withMessage('Valid check-out time is required')
 ];
+

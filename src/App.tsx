@@ -37,9 +37,16 @@ function App() {
                 <Route path="profile" element={<Profile />} />
               </Route>
             </Routes>
+            
+            {/* Single Toaster instance to prevent duplicates */}
             <Toaster
               position="top-right"
+              reverseOrder={false}
+              gutter={8}
+              containerClassName=""
+              containerStyle={{}}
               toastOptions={{
+                // Default options for all toasts
                 duration: 4000,
                 style: {
                   background: '#363636',
@@ -48,8 +55,11 @@ function App() {
                   padding: '16px',
                   fontSize: '14px',
                   fontWeight: '500',
+                  maxWidth: '500px',
                 },
+                // Success toast styling
                 success: {
+                  duration: 3000,
                   style: {
                     background: '#10b981',
                   },
@@ -58,13 +68,21 @@ function App() {
                     secondary: '#10b981',
                   },
                 },
+                // Error toast styling
                 error: {
+                  duration: 5000,
                   style: {
                     background: '#ef4444',
                   },
                   iconTheme: {
                     primary: '#fff',
                     secondary: '#ef4444',
+                  },
+                },
+                // Loading toast styling
+                loading: {
+                  style: {
+                    background: '#3b82f6',
                   },
                 },
               }}
@@ -77,3 +95,4 @@ function App() {
 }
 
 export default App;
+

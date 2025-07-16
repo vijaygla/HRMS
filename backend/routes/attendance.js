@@ -38,3 +38,4 @@ router.get('/stats/overview', authorize('admin', 'hr', 'manager'), getAttendance
 router.get('/reports/export', authorize('admin', 'hr'), getAttendanceReport);
 
 export default router;
+

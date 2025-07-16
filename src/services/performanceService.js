@@ -21,6 +21,16 @@ export const performanceService = {
     }
   },
 
+  // Get single performance review
+  getPerformanceReview: async (id) => {
+    try {
+      const response = await api.get(`/performance/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to fetch performance review' };
+    }
+  },
+
   // Create performance review
   createPerformanceReview: async (reviewData) => {
     try {
@@ -38,6 +48,16 @@ export const performanceService = {
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Failed to update performance review' };
+    }
+  },
+
+  // Delete performance review
+  deletePerformanceReview: async (id) => {
+    try {
+      const response = await api.delete(`/performance/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to delete performance review' };
     }
   },
 
@@ -71,3 +91,4 @@ export const performanceService = {
     }
   }
 };
+

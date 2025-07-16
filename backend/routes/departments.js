@@ -27,3 +27,4 @@ router.route('/:id')
 router.get('/:id/stats', getDepartmentStats);
 
 export default router;
+

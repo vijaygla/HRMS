@@ -15,3 +15,4 @@ export const generateRefreshToken = (payload) => {
     expiresIn: '30d',
   });
 };
+

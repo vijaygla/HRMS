@@ -1,100 +1,5 @@
 import Attendance from '../models/Attendance.js';
 import Employee from '../models/Employee.js';
-import mongoose from 'mongoose';
-
-// @desc    Create attendance record
-// @route   POST /api/attendance
-// @access  Private (Admin/HR)
-export const createAttendance = async (req, res) => {
-  try {
-    console.log('Request body:', req.body);
-    
-    // Validate required fields
-    if (!req.body.employee) {
-      return res.status(400).json({
-        success: false,
-        message: 'Employee ID is required'
-      });
-    }
-
-    // Validate employee exists
-    const employee = await Employee.findById(req.body.employee);
-    if (!employee) {
-      return res.status(404).json({
-        success: false,
-        message: 'Employee not found'
-      });
-    }
-
-    // Check if attendance record already exists for this date
-    const existingAttendance = await Attendance.findOne({
-      employee: req.body.employee,
-      date: {
-        $gte: new Date(new Date(req.body.date).setHours(0, 0, 0, 0)),
-        $lt: new Date(new Date(req.body.date).setHours(23, 59, 59, 999))
-      }
-    });
-
-    if (existingAttendance) {
-      return res.status(400).json({
-        success: false,
-        message: 'Attendance record already exists for this date'
-      });
-    }
-
-    // Create attendance record
-    const attendanceData = {
-      employee: req.body.employee,
-      date: new Date(req.body.date),
-      checkIn: req.body.checkIn,
-      checkOut: req.body.checkOut,
-      status: req.body.status || 'present',
-      isManualEntry: true
-    };
-
-    console.log('Attendance data to create:', attendanceData);
-
-    const attendance = await Attendance.create(attendanceData);
-
-    // Calculate working hours if both checkIn and checkOut are provided
-    if (attendance.checkIn && attendance.checkIn.time && attendance.checkOut && attendance.checkOut.time) {
-      attendance.calculateWorkingHours();
-      await attendance.save();
-    }
-
-    res.status(201).json({
-      success: true,
-      message: 'Attendance record created successfully',
-      data: attendance
-    });
-  } catch (error) {
-    console.error('Error creating attendance:', error);
-    
-    // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: errors
-      });
-    }
-
-    // Handle duplicate key error
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Duplicate attendance record'
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-};
 
 // @desc    Get all attendance records
 // @route   GET /api/attendance
@@ -109,24 +14,11 @@ export const getAttendance = async (req, res) => {
     let query = {};
     
     if (req.query.employee) {
-      // Validate ObjectId format
-      if (!mongoose.Types.ObjectId.isValid(req.query.employee)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid employee ID format'
-        });
-      }
       query.employee = req.query.employee;
     }
     
     if (req.query.date) {
       const date = new Date(req.query.date);
-      if (isNaN(date.getTime())) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid date format'
-        });
-      }
       query.date = {
         $gte: new Date(date.setHours(0, 0, 0, 0)),
         $lt: new Date(date.setHours(23, 59, 59, 999))
@@ -137,17 +29,7 @@ export const getAttendance = async (req, res) => {
       query.status = req.query.status;
     }
 
-    console.log('Query:', query);
-
     const attendance = await Attendance.find(query)
-      .populate({
-        path: 'employee',
-        select: 'personalInfo.firstName personalInfo.lastName employeeId jobInfo.department',
-        populate: {
-          path: 'jobInfo.department',
-          select: 'name'
-        }
-      })
       .skip(skip)
       .limit(limit)
       .sort({ date: -1 });
@@ -166,7 +48,6 @@ export const getAttendance = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    console.error('Error getting attendance:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -180,22 +61,7 @@ export const getAttendance = async (req, res) => {
 // @access  Private
 export const getAttendanceById = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid attendance ID format'
-      });
-    }
-
-    const attendance = await Attendance.findById(req.params.id)
-      .populate({
-        path: 'employee',
-        select: 'personalInfo.firstName personalInfo.lastName employeeId jobInfo.department',
-        populate: {
-          path: 'jobInfo.department',
-          select: 'name'
-        }
-      });
+    const attendance = await Attendance.findById(req.params.id);
 
     if (!attendance) {
       return res.status(404).json({
@@ -209,7 +75,34 @@ export const getAttendanceById = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    console.error('Error getting attendance by ID:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Create attendance record
+// @route   POST /api/attendance
+// @access  Private (Admin/HR)
+export const createAttendance = async (req, res) => {
+  try {
+    const attendance = await Attendance.create({
+      ...req.body,
+      isManualEntry: true
+    });
+
+    // Calculate working hours
+    attendance.calculateWorkingHours();
+    await attendance.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Attendance record created successfully',
+      data: attendance
+    });
+  } catch (error) {
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -223,13 +116,6 @@ export const getAttendanceById = async (req, res) => {
 // @access  Private (Admin/HR)
 export const updateAttendance = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid attendance ID format'
-      });
-    }
-
     const attendance = await Attendance.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -244,10 +130,8 @@ export const updateAttendance = async (req, res) => {
     }
 
     // Recalculate working hours
-    if (attendance.checkIn && attendance.checkIn.time && attendance.checkOut && attendance.checkOut.time) {
-      attendance.calculateWorkingHours();
-      await attendance.save();
-    }
+    attendance.calculateWorkingHours();
+    await attendance.save();
 
     res.status(200).json({
       success: true,
@@ -255,17 +139,6 @@ export const updateAttendance = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    console.error('Error updating attendance:', error);
-    
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: errors
-      });
-    }
-
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -279,13 +152,6 @@ export const updateAttendance = async (req, res) => {
 // @access  Private (Admin/HR)
 export const deleteAttendance = async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid attendance ID format'
-      });
-    }
-
     const attendance = await Attendance.findByIdAndDelete(req.params.id);
 
     if (!attendance) {
@@ -300,7 +166,6 @@ export const deleteAttendance = async (req, res) => {
       message: 'Attendance record deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting attendance:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -335,7 +200,7 @@ export const checkIn = async (req, res) => {
       }
     });
 
-    if (existingAttendance && existingAttendance.checkIn && existingAttendance.checkIn.time) {
+    if (existingAttendance && existingAttendance.checkIn.time) {
       return res.status(400).json({
         success: false,
         message: 'Already checked in today'
@@ -368,7 +233,6 @@ export const checkIn = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    console.error('Error checking in:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -403,14 +267,14 @@ export const checkOut = async (req, res) => {
       }
     });
 
-    if (!attendance || !attendance.checkIn || !attendance.checkIn.time) {
+    if (!attendance || !attendance.checkIn.time) {
       return res.status(400).json({
         success: false,
         message: 'No check-in record found for today'
       });
     }
 
-    if (attendance.checkOut && attendance.checkOut.time) {
+    if (attendance.checkOut.time) {
       return res.status(400).json({
         success: false,
         message: 'Already checked out today'
@@ -434,7 +298,6 @@ export const checkOut = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    console.error('Error checking out:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -480,7 +343,6 @@ export const getMyAttendance = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    console.error('Error getting my attendance:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -548,7 +410,6 @@ export const getAttendanceStats = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error getting attendance stats:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -599,7 +460,6 @@ export const getAttendanceReport = async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    console.error('Error generating attendance report:', error);
     res.status(500).json({
       success: false,
       message: 'Server error',
@@ -607,3 +467,4 @@ export const getAttendanceReport = async (req, res) => {
     });
   }
 };
+

@@ -59,5 +59,36 @@ export const attendanceService = {
     } catch (error) {
       throw error.response?.data || { message: 'Failed to create attendance record' };
     }
+  },
+
+  // Update attendance record
+  updateAttendance: async (id, attendanceData) => {
+    try {
+      const response = await api.put(`/attendance/${id}`, attendanceData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to update attendance record' };
+    }
+  },
+
+  // Delete attendance record
+  deleteAttendance: async (id) => {
+    try {
+      const response = await api.delete(`/attendance/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to delete attendance record' };
+    }
+  },
+
+  // Get attendance report
+  getAttendanceReport: async (params = {}) => {
+    try {
+      const response = await api.get('/attendance/reports/export', { params });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to generate attendance report' };
+    }
   }
 };
+

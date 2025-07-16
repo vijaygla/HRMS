@@ -59,5 +59,26 @@ export const employeeService = {
     } catch (error) {
       throw error.response?.data || { message: 'Failed to fetch employees by department' };
     }
+  },
+
+  // Upload employee document
+  uploadEmployeeDocument: async (id, documentData) => {
+    try {
+      const response = await api.post(`/employees/${id}/documents`, documentData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to upload document' };
+    }
+  },
+
+  // Get employee statistics
+  getEmployeeStats: async () => {
+    try {
+      const response = await api.get('/employees/stats/overview');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to fetch employee stats' };
+    }
   }
 };
+

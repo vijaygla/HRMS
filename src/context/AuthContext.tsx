@@ -54,18 +54,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const response = await authService.getCurrentUser();
           if (response.success) {
             setUser(response.data.user);
-            toast.success('Welcome back!', { duration: 2000 });
+            // Only show welcome message on fresh login, not on page refresh
+            const isNewLogin = sessionStorage.getItem('hrms_new_login');
+            if (isNewLogin) {
+              toast.success('Welcome back!', { duration: 2000 });
+              sessionStorage.removeItem('hrms_new_login');
+            }
           } else {
             localStorage.removeItem('hrms_token');
             localStorage.removeItem('hrms_user');
-            toast.error('Session expired. Please login again.');
           }
         } catch (error: any) {
           console.error('Auth initialization error:', error);
           localStorage.removeItem('hrms_token');
           localStorage.removeItem('hrms_user');
           
-          if (error?.message && !error.message.includes('Network Error')) {
+          // Only show error if it's not a network error
+          if (error?.message && !error.message.includes('Network Error') && !error.message.includes('fetch')) {
             toast.error('Session expired. Please login again.');
           }
         }
@@ -86,6 +91,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(userData);
         localStorage.setItem('hrms_token', token);
         localStorage.setItem('hrms_user', JSON.stringify(userData));
+        sessionStorage.setItem('hrms_new_login', 'true'); // Flag for new login
         return true;
       }
       return false;
@@ -104,6 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(newUser);
         localStorage.setItem('hrms_token', token);
         localStorage.setItem('hrms_user', JSON.stringify(newUser));
+        sessionStorage.setItem('hrms_new_login', 'true'); // Flag for new registration
         return true;
       }
       return false;
@@ -117,6 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     localStorage.removeItem('hrms_token');
     localStorage.removeItem('hrms_user');
+    sessionStorage.removeItem('hrms_new_login');
     toast.success('Logged out successfully');
   };
 
@@ -144,3 +152,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+

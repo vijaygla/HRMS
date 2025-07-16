@@ -80,3 +80,4 @@ departmentSchema.pre(/^find/, function(next) {
 });
 
 export default mongoose.model('Department', departmentSchema);
+

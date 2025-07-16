@@ -1,0 +1,139 @@
+@host = http://localhost:5000
+
+### register
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Vijay Kumar",
+  "email": "pmdhrs@gmail.com",
+  "username": "pmdhrs",
+  "password": "123456",
+  "role": "admin"
+}
+
+### login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "pmdhrs@gmail.com",
+  "password": "123456"
+}
+
+### update profile
+PUT {{host}}/api/auth/profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzczMTBiNTdjMmJkOTkzMTY3YjBjZCIsImlhdCI6MTc1MjY0MTkzOSwiZXhwIjoxNzUzMjQ2NzM5fQ.E92mEy1n2fTmsx2OWaoz-MeFRcvYUyOJ1bpfIsJQs-k
+
+{
+    "avatar": "https://example.com/avatar.jpg"
+}
+
+### DEPARTMENT ENDPOINTS
+### Get all departments (Any authenticated user can access)
+GET {{host}}/api/departments
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzIxMmE3ZDljN2ZjMmE2NDVlYzM5ZCIsImlhdCI6MTc1MjMzNTIyMywiZXhwIjoxNzUyOTQwMDIzfQ.iEBs-tOlC-H6W5pRj9DSMbhgKp8DuhYH7l5AIOEHtpg
+
+### Create new department (Admin or HR only)
+POST {{host}}/api/departments
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NmY2ZmE2ODM1M2U3YzBlMjgwYmYwYiIsImlhdCI6MTc1MjEzMzU1OSwiZXhwIjoxNzUyNzM4MzU5fQ.6El6CpspfWqFjCe8cDrgBKg9u5fZoKkoTdkNvs99mEE
+
+{
+    "name": "Engineering",
+    "code": "ENG",
+    "description": "Software Engineering Department",
+    "manager": "686f6fa68353e7c0e280bf0b",
+    "location": "Main Office",
+    "isActive": true
+}
+
+### EMPLOYEE ENDPOINTS
+
+### Get all employees with pagination and filters (Private)
+GET {{host}}/api/employees?page=1&limit=10&status=active&search=John
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzIxMmE3ZDljN2ZjMmE2NDVlYzM5ZCIsImlhdCI6MTc1MjMzNTIyMywiZXhwIjoxNzUyOTQwMDIzfQ.iEBs-tOlC-H6W5pRj9DSMbhgKp8DuhYH7l5AIOEHtpg
+
+### Create new employee (Private - Admin/HR)
+POST {{host}}/api/employees
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzczMTBiNTdjMmJkOTkzMTY3YjBjZCIsImlhdCI6MTc1MjY0ODY5MywiZXhwIjoxNzUzMjUzNDkzfQ.1FNUFf6VBBOmWHuCfH76-32KCdq7cQ7h8i0gQa2PHl4
+
+{
+  "personalInfo": {
+    "firstName":      "Nidhi",
+    "lastName":       "Chaudhary",
+    "dateOfBirth":    "1990-05-15",
+    "gender":         "female",
+    "maritalStatus":  "married",
+    "nationality":    "Indian",
+    "phone":          "987-654-3210",
+    "emergencyContact": {
+      "name":         "Krish",
+      "relationship": "frnd",
+      "phone":        "123-456-7890"
+    }
+  },
+  "address": {
+    "street":  "456 Oak Ave",
+    "city":    "Anytown",
+    "state":   "CA",
+    "zipCode": "90210",
+    "country": "USA"
+  },
+  "jobInfo": {
+    "department":     "6874d050b38f1086db2a1755",
+    "position":       "Software Engineer",
+    "employmentType": "full-time",
+    "joinDate":       "2023-01-20",
+    "workLocation":   "office"
+  },
+  "salary": {
+    "baseSalary": 75000,
+    "currency":   "USD",
+    "payFrequency": "monthly"
+  },
+  "benefits": {
+    "healthInsurance":  true,
+    "dentalInsurance":  false,
+    "visionInsurance":  false,
+    "retirement401k":   true
+  },
+  "userInfo": {
+    "email":    "nidhi@gmail.com",
+    "password": "123456",
+    "role":     "employee"
+  }
+}
+
+
+###
+# Get all attendance records (with optional filters & pagination)
+GET {{host}}/api/attendance?page=1&limit=10&employee=<employeeId>&date=2025-07-13&status=present
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzIxMmE3ZDljN2ZjMmE2NDVlYzM5ZCIsImlhdCI6MTc1MjMzNTIyMywiZXhwIjoxNzUyOTQwMDIzfQ.iEBs-tOlC-H6W5pRj9DSMbhgKp8DuhYH7l5AIOEHtpg
+
+### Create manual attendance record (CORRECTED)
+POST {{host}}/api/attendance
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzIxMmE3ZDljN2ZjMmE2NDVlYzM5ZCIsImlhdCI6MTc1MjMzNTIyMywiZXhwIjoxNzUyOTQwMDIzfQ.iEBs-tOlC-H6W5pRj9DSMbhgKp8DuhYH7l5AIOEHtpg
+
+
+{
+  "employee": "{employeeId}",
+  "date": "2025-07-13T00:00:00.000Z",
+  "checkIn": {
+    "time": "2025-07-13T09:00:00.000Z",
+    "location": "office",
+    "coordinates": "12.9716,77.5946"
+  },
+  "checkOut": {
+    "time": "2025-07-13T17:30:00.000Z",
+    "location": "office",
+    "coordinates": "12.9716,77.5946"
+  },
+  "status": "present"
+}
+
+

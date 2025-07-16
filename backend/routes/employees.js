@@ -16,16 +16,21 @@ const router = express.Router();
 // All routes are protected
 router.use(protect);
 
+// Get all employees - accessible by all authenticated users
 router.route('/')
   .get(getEmployees)
-  .post(authorize('admin', 'hr'), validateEmployee, validateRequest, createEmployee);
+  .post(authorize('admin', 'hr', 'manager'), createEmployee);
+//   validateEmployee, validateRequest, 
 
+// Employee CRUD operations
 router.route('/:id')
   .get(getEmployee)
-  .put(authorize('admin', 'hr'), updateEmployee)
-  .delete(authorize('admin', 'hr'), deleteEmployee);
+  .put(authorize('admin', 'hr', 'manager'), updateEmployee)
+  .delete(authorize('admin', 'hr', 'manager'), deleteEmployee);
 
+// Additional routes
 router.get('/department/:departmentId', getEmployeesByDepartment);
-router.post('/:id/documents', authorize('admin', 'hr'), uploadEmployeeDocument);
+router.post('/:id/documents', authorize('admin', 'hr', 'manager'), uploadEmployeeDocument);
 
 export default router;
+

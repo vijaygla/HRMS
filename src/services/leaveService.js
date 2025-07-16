@@ -51,6 +51,16 @@ export const leaveService = {
     }
   },
 
+  // Delete leave request
+  deleteLeave: async (id) => {
+    try {
+      const response = await api.delete(`/leaves/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Failed to delete leave request' };
+    }
+  },
+
   // Approve leave
   approveLeave: async (id) => {
     try {
@@ -81,3 +91,4 @@ export const leaveService = {
     }
   }
 };
+

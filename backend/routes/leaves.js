@@ -40,3 +40,4 @@ router.get('/my-balance', getLeaveBalance);
 router.get('/stats/overview', authorize('admin', 'hr'), getLeaveStats);
 
 export default router;
+

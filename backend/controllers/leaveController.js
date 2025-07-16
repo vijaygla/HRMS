@@ -503,3 +503,4 @@ export const getLeaveStats = async (req, res) => {
     });
   }
 };
+

@@ -38,14 +38,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  phoneNumber: {
-    type: String,
-    default: ''
-  },
-  location: {
-    type: String,
-    default: ''
-  },
   isActive: {
     type: Boolean,
     default: true
@@ -129,3 +121,4 @@ userSchema.virtual('employee', {
 });
 
 export default mongoose.model('User', userSchema);
+

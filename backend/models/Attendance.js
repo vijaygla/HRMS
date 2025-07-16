@@ -113,3 +113,4 @@ attendanceSchema.pre(/^find/, function(next) {
 });
 
 export default mongoose.model('Attendance', attendanceSchema);
+
